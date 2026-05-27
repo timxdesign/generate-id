@@ -22,6 +22,26 @@ export const metadata: Metadata = {
   title: 'GenerateID — Beautiful ID Cards in Seconds',
   description:
     'Create stunning, customizable ID cards for any purpose. Export for social media or print.',
+  openGraph: {
+    title: 'GenerateID — Beautiful ID Cards in Seconds',
+    description:
+      'Create stunning, customizable ID cards for any purpose. Export for social media or print.',
+    images: [
+      {
+        url: '/asset/generateid_socialpreview.png',
+        width: 1200,
+        height: 630,
+        alt: 'GenerateID — Beautiful ID Cards in Seconds',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'GenerateID — Beautiful ID Cards in Seconds',
+    description:
+      'Create stunning, customizable ID cards for any purpose. Export for social media or print.',
+    images: ['/asset/generateid_socialpreview.png'],
+  },
 };
 
 export default function RootLayout({
