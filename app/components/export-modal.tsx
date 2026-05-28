@@ -86,8 +86,8 @@ export default function ExportModal({
   );
 
   const { colors, orientation } = cardProps;
-  const cardScale = orientation === 'landscape' ? 1.7 : 2.0;
-  const previewCardScale = orientation === 'landscape' ? 0.48 : 0.55;
+  const cardScale = orientation === 'landscape' ? 1.8 : 1.7;
+  const previewCardScale = orientation === 'landscape' ? 0.48 : 0.45;
 
   return (
     <>
@@ -102,7 +102,7 @@ export default function ExportModal({
             ref={socialRef}
             style={{
               width: 1080,
-              height: 1350,
+              height: 1080,
               position: 'relative',
               overflow: 'hidden',
               background: `linear-gradient(135deg, ${colors.background}ee, ${colors.primary}dd, ${colors.secondary}ee)`,
@@ -285,7 +285,7 @@ export default function ExportModal({
                               <p className="text-[11px] text-zinc-400 text-center">
                                 Optimized for Instagram, Twitter & LinkedIn
                               </p>
-                              <div className="w-full max-w-[280px] aspect-[4/5] rounded-xl overflow-hidden shadow-lg border border-zinc-100">
+                              <div className="w-full max-w-[280px] aspect-square rounded-xl overflow-hidden shadow-lg border border-zinc-100">
                                 <div
                                   className="w-full h-full flex items-center justify-center relative"
                                   style={{

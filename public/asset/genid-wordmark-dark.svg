@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 110" width="560" height="110">
+  <text x="0" y="84" font-family="Geist, -apple-system, Helvetica Neue, Arial, sans-serif" font-weight="500" font-size="96" letter-spacing="-4" fill="#f6f5ef">Generate</text>
+  <g transform="translate(430, 8)">
+    <rect width="98" height="94" rx="16" fill="#d6f266"></rect>
+    <g fill="#15151a" fill-rule="evenodd">
+      <rect x="25" y="24" width="13" height="46" rx="1"></rect>
+      <path d="M 47 24 L 64 24 A 23 23 0 0 1 64 70 L 47 70 Z M 55 34 L 62 34 A 12 12 0 0 1 62 60 L 55 60 Z"></path>
+    </g>
+    <circle cx="84" cy="14" r="3.5" fill="#15151a"></circle>
+  </g>
+</svg>

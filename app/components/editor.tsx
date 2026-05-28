@@ -15,7 +15,7 @@ import {
   Smartphone,
 } from 'lucide-react';
 import { useCardStore, type CardStore } from '../store/card-store';
-import { STYLES, type StyleColors } from '../lib/styles';
+import { STYLES, type StyleColors, getStyleById } from '../lib/styles';
 import CardRenderer, { CARD_W, CARD_H } from './card-renderer';
 import ExportModal from './export-modal';
 
@@ -45,10 +45,15 @@ export default function Editor() {
     return () => observer.disconnect();
   }, [store.orientation]);
 
+  const effectiveStyle = store.previewStyle ?? store.style;
+  const effectiveColors = store.previewStyle
+    ? getStyleById(store.previewStyle).defaults
+    : store.colors;
+
   const cardProps = {
-    style: store.style,
+    style: effectiveStyle,
     orientation: store.orientation,
-    colors: store.colors,
+    colors: effectiveColors,
     fullName: store.fullName,
     title: store.title,
     organization: store.organization,
@@ -116,16 +121,26 @@ export default function Editor() {
           >
             <AnimatePresence mode="wait">
               <motion.div
-                key={`${store.style}-${store.orientation}`}
+                key={store.orientation}
                 initial={{ rotateY: 90, opacity: 0 }}
                 animate={{ rotateY: 0, opacity: 1 }}
                 exit={{ rotateY: -90, opacity: 0 }}
                 transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <div className="shadow-2xl rounded-2xl">
-                  <CardRenderer {...cardProps} />
-                </div>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={effectiveStyle}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <div className="shadow-2xl rounded-2xl">
+                      <CardRenderer {...cardProps} />
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -218,52 +233,59 @@ export default function Editor() {
 function StyleTab() {
   const style = useCardStore((s) => s.style);
   const setStyle = useCardStore((s) => s.setStyle);
+  const setPreviewStyle = useCardStore((s) => s.setPreviewStyle);
 
   return (
-    <div className="space-y-3">
-      <p className="text-[11px] text-zinc-400">
-        Choose a style that fits your purpose
-      </p>
-      <div className="grid grid-cols-2 gap-2.5">
-        {STYLES.map((s) => (
-          <motion.button
-            key={s.id}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => setStyle(s.id)}
-            className={`relative p-2.5 rounded-xl border-2 text-left transition-all ${
-              style === s.id
-                ? 'border-zinc-900 shadow-sm'
-                : 'border-zinc-100 hover:border-zinc-200'
-            }`}
-          >
-            <div
-              className="w-full h-14 rounded-lg mb-2 overflow-hidden"
-              style={{
-                background: `linear-gradient(135deg, ${s.defaults.primary}, ${s.defaults.background}, ${s.defaults.secondary})`,
+    <div>
+      <p className="text-[11px] text-zinc-400 mb-3">Choose a style</p>
+      <div className="space-y-1" onMouseLeave={() => setPreviewStyle(null)}>
+        {STYLES.map((s) => {
+          const active = style === s.id;
+          return (
+            <motion.button
+              key={s.id}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => {
+                setStyle(s.id);
+                setPreviewStyle(null);
               }}
+              onMouseEnter={() => setPreviewStyle(s.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-150 ${
+                active ? 'bg-zinc-900' : 'hover:bg-zinc-50'
+              }`}
             >
-              <div className="h-full flex items-center justify-center">
-                <div
-                  className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: s.defaults.accent }}
-                />
-              </div>
-            </div>
-            <p className="text-xs font-semibold text-zinc-900">{s.name}</p>
-            <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
-              {s.tagline}
-            </p>
-
-            {style === s.id && (
-              <motion.div
-                layoutId="style-dot"
-                className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-zinc-900"
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              <div
+                className="w-8 h-8 rounded-lg shrink-0"
+                style={{
+                  background: `linear-gradient(135deg, ${s.defaults.primary}, ${s.defaults.accent})`,
+                }}
               />
-            )}
-          </motion.button>
-        ))}
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-xs font-medium leading-tight ${
+                    active ? 'text-white' : 'text-zinc-800'
+                  }`}
+                >
+                  {s.name}
+                </p>
+                <p
+                  className={`text-[10px] leading-tight mt-0.5 ${
+                    active ? 'text-zinc-400' : 'text-zinc-400'
+                  }`}
+                >
+                  {s.tagline}
+                </p>
+              </div>
+              {active && (
+                <motion.div
+                  layoutId="style-dot"
+                  className="w-1.5 h-1.5 rounded-full bg-white shrink-0"
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                />
+              )}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );

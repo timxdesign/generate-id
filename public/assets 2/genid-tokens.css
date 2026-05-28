@@ -1,0 +1,40 @@
+/* GenerateID — design tokens v1.0 */
+
+:root {
+  /* Brand */
+  --genid-lime:    oklch(0.92 0.17 122);   /* #d6f266 — Spectrum Lime, primary */
+  --genid-ink:     oklch(0.20 0.012 280);  /* #15151a — Ink, primary text + dark surfaces */
+  --genid-paper:   oklch(0.98 0.006 90);   /* #f6f5ef — Paper, light surfaces */
+
+  /* Accents (share chroma + lightness, vary hue) */
+  --genid-coral:   oklch(0.74 0.16 30);    /* #ff8866 */
+  --genid-cobalt:  oklch(0.62 0.16 258);   /* #4f6df0 */
+  --genid-orchid:  oklch(0.72 0.16 320);   /* #d27bd6 */
+
+  /* Neutrals */
+  --genid-fog-50:  oklch(0.96 0.005 90);
+  --genid-fog-100: oklch(0.92 0.006 90);
+  --genid-fog-200: oklch(0.85 0.007 90);
+  --genid-fog-400: oklch(0.60 0.008 280);
+  --genid-fog-600: oklch(0.40 0.010 280);
+  --genid-fog-800: oklch(0.26 0.012 280);
+
+  /* Type */
+  --genid-sans:    "Geist", "Inter Tight", system-ui, -apple-system, sans-serif;
+  --genid-mono:    "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+
+  /* Radii */
+  --genid-r-sm: 6px;
+  --genid-r-md: 12px;
+  --genid-r-lg: 20px;
+  --genid-r-card: 16px;   /* matches ID card corner radius */
+
+  /* Spacing scale */
+  --genid-space-1: 4px;
+  --genid-space-2: 8px;
+  --genid-space-3: 12px;
+  --genid-space-4: 16px;
+  --genid-space-6: 24px;
+  --genid-space-8: 32px;
+  --genid-space-12: 48px;
+}

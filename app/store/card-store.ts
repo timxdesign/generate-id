@@ -33,6 +33,7 @@ interface CardState {
   orientation: Orientation;
   colors: StyleColors;
   customFields: CustomField[];
+  previewStyle: CardStyle | null;
 }
 
 interface CardActions {
@@ -45,6 +46,7 @@ interface CardActions {
   addCustomField: () => void;
   updateCustomField: (id: string, key: 'label' | 'value', value: string) => void;
   removeCustomField: (id: string) => void;
+  setPreviewStyle: (style: CardStyle | null) => void;
 }
 
 const initialStyle = getStyleById('fancy');
@@ -64,6 +66,7 @@ export const useCardStore = create<CardStore>((set, get) => ({
   orientation: 'landscape',
   colors: { ...initialStyle.defaults },
   customFields: [],
+  previewStyle: null,
 
   setField: (field, value) => set({ [field]: value }),
   setPhoto: (url) => set({ photoUrl: url }),
@@ -71,6 +74,7 @@ export const useCardStore = create<CardStore>((set, get) => ({
     const def = getStyleById(style);
     set({ style, colors: { ...def.defaults } });
   },
+  setPreviewStyle: (style) => set({ previewStyle: style }),
   setOrientation: (orientation) => set({ orientation }),
   setColor: (key, value) =>
     set((s) => ({ colors: { ...s.colors, [key]: value } })),
