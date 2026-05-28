@@ -50,6 +50,11 @@ export default function Editor() {
     ? getStyleById(store.previewStyle).defaults
     : store.colors;
 
+  const handleFieldClick = (field: string) => {
+    setActiveTab('details');
+    store.setFocusField(field);
+  };
+
   const cardProps = {
     style: effectiveStyle,
     orientation: store.orientation,
@@ -63,6 +68,7 @@ export default function Editor() {
     phone: store.phone,
     photoUrl: store.photoUrl,
     customFields: store.customFields,
+    onFieldClick: handleFieldClick,
   };
 
   return (
@@ -220,7 +226,7 @@ export default function Editor() {
       <ExportModal
         isOpen={showExport}
         onClose={() => setShowExport(false)}
-        cardProps={cardProps}
+        cardProps={{ ...cardProps, onFieldClick: undefined }}
       />
     </motion.div>
   );
@@ -313,6 +319,21 @@ const FIELDS: { key: FieldKey; label: string; placeholder: string }[] = [
 
 function DetailsTab() {
   const store = useCardStore();
+  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const photoRef = useRef<HTMLLabelElement>(null);
+  const focusField = useCardStore((s) => s.focusField);
+  const setFocusField = useCardStore((s) => s.setFocusField);
+
+  useEffect(() => {
+    if (!focusField) return;
+    if (focusField === 'photo') {
+      photoRef.current?.click();
+    } else if (inputRefs.current[focusField]) {
+      inputRefs.current[focusField]?.focus();
+      inputRefs.current[focusField]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    setFocusField(null);
+  }, [focusField, setFocusField]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -331,7 +352,7 @@ function DetailsTab() {
         <label className="text-[11px] font-medium text-zinc-500 mb-1.5 block">
           Photo
         </label>
-        <label className="flex items-center gap-3 p-2.5 rounded-xl border border-dashed border-zinc-200 hover:border-zinc-300 cursor-pointer transition-colors">
+        <label ref={photoRef} className="flex items-center gap-3 p-2.5 rounded-xl border border-dashed border-zinc-200 hover:border-zinc-300 cursor-pointer transition-colors">
           {store.photoUrl ? (
             <img
               src={store.photoUrl}
@@ -373,6 +394,7 @@ function DetailsTab() {
             {f.label}
           </label>
           <input
+            ref={(el) => { inputRefs.current[f.key] = el; }}
             type="text"
             value={store[f.key]}
             onChange={(e) => store.setField(f.key, e.target.value)}

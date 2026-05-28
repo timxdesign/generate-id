@@ -40,6 +40,18 @@ body {
   box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.06);
 }
 
+.card-interactive [data-field] {
+  cursor: text;
+  border-radius: 2px;
+  outline: 1.5px dashed transparent;
+  outline-offset: 2px;
+  transition: outline-color 0.15s ease, background-color 0.15s ease;
+}
+.card-interactive [data-field]:hover {
+  outline-color: rgba(128, 128, 128, 0.45);
+  background-color: rgba(128, 128, 128, 0.08);
+}
+
 .color-transition * {
   transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, background 0.35s ease;
 }

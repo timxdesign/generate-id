@@ -16,6 +16,7 @@ export interface CardRendererProps {
   phone: string;
   photoUrl: string | null;
   customFields: CustomField[];
+  onFieldClick?: (field: string) => void;
 }
 
 export const CARD_W = 510;
@@ -33,14 +34,22 @@ const renderers: Record<CardStyle, StyleRenderer> = {
 };
 
 export default function CardRenderer(props: CardRendererProps) {
-  const { style, orientation } = props;
+  const { style, orientation, onFieldClick } = props;
   const w = orientation === 'landscape' ? CARD_W : CARD_H;
   const h = orientation === 'landscape' ? CARD_H : CARD_W;
 
+  const handleClick = onFieldClick
+    ? (e: React.MouseEvent) => {
+        const el = (e.target as HTMLElement).closest('[data-field]');
+        if (el) onFieldClick(el.getAttribute('data-field')!);
+      }
+    : undefined;
+
   return (
     <div
-      className="relative overflow-hidden color-transition"
+      className={`relative overflow-hidden color-transition${onFieldClick ? ' card-interactive' : ''}`}
       style={{ width: w, height: h, borderRadius: 16 }}
+      onClick={handleClick}
     >
       {renderers[style](props)}
     </div>
@@ -57,12 +66,14 @@ function Photo({
   accent,
   size,
   shape,
+  dataField,
 }: {
   url: string | null;
   name: string;
   accent: string;
   size: { w: number; h: number };
   shape: 'rounded' | 'circle' | 'square';
+  dataField?: string;
 }) {
   const radius =
     shape === 'circle' ? '50%' : shape === 'rounded' ? '10px' : '4px';
@@ -77,6 +88,7 @@ function Photo({
 
   return (
     <div
+      data-field={dataField}
       className="flex-shrink-0 overflow-hidden border-2"
       style={{
         width: size.w,
@@ -216,16 +228,19 @@ function renderFancy(p: CardRendererProps) {
           accent={colors.accent}
           size={isL ? { w: 90, h: 110 } : { w: 82, h: 100 }}
           shape="rounded"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
           <p
+            data-field="organization"
             className="text-[9px] tracking-[0.25em] uppercase opacity-60"
             style={{ color: colors.accent }}
           >
             {organization || 'Organization'}
           </p>
           <h2
+            data-field="fullName"
             className="text-[22px] font-bold tracking-wide leading-tight truncate mt-1"
             style={{
               color: colors.text,
@@ -240,11 +255,12 @@ function renderFancy(p: CardRendererProps) {
               background: `linear-gradient(90deg, ${colors.accent}, transparent)`,
             }}
           />
-          <p className="text-[11px] opacity-80" style={{ color: colors.text }}>
+          <p data-field="title" className="text-[11px] opacity-80" style={{ color: colors.text }}>
             {title || 'Title'}
           </p>
           {department && (
             <p
+              data-field="department"
               className="text-[10px] opacity-50 mt-0.5"
               style={{ color: colors.text }}
             >
@@ -253,10 +269,20 @@ function renderFancy(p: CardRendererProps) {
           )}
 
           <div className="mt-3">
-            <InfoLine
-              items={[idNumber, contactEmail, phone]}
-              color={colors.text}
-            />
+            <p className="text-[8px] opacity-50" style={{ color: colors.text }}>
+              {[
+                { value: idNumber, field: 'idNumber' },
+                { value: contactEmail, field: 'contactEmail' },
+                { value: phone, field: 'phone' },
+              ]
+                .filter((x) => x.value)
+                .map((x, i) => (
+                  <span key={x.field}>
+                    {i > 0 && '  ·  '}
+                    <span data-field={x.field}>{x.value}</span>
+                  </span>
+                ))}
+            </p>
             <CustomFieldsRow
               fields={customFields}
               color={colors.text}
@@ -328,16 +354,19 @@ function renderExecutive(p: CardRendererProps) {
           accent={colors.accent}
           size={isL ? { w: 82, h: 82 } : { w: 76, h: 76 }}
           shape="circle"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
           <h2
+            data-field="fullName"
             className="text-[20px] font-semibold tracking-wide truncate"
             style={{ color: colors.text }}
           >
             {fullName || 'Your Name'}
           </h2>
           <p
+            data-field="title"
             className="text-[11px] mt-0.5"
             style={{ color: colors.accent }}
           >
@@ -347,8 +376,8 @@ function renderExecutive(p: CardRendererProps) {
             className="text-[10px] opacity-50 mt-0.5"
             style={{ color: colors.text }}
           >
-            {organization || 'Organization'}
-            {department ? ` · ${department}` : ''}
+            <span data-field="organization">{organization || 'Organization'}</span>
+            {department && <span data-field="department"> · {department}</span>}
           </p>
 
           <div
@@ -361,10 +390,12 @@ function renderExecutive(p: CardRendererProps) {
             style={{ color: colors.text }}
           >
             {idNumber && (
-              <span className="font-mono tracking-wide">{idNumber}</span>
+              <span data-field="idNumber" className="font-mono tracking-wide">{idNumber}</span>
             )}
             <span>
-              {[contactEmail, phone].filter(Boolean).join(' · ')}
+              {contactEmail && <span data-field="contactEmail">{contactEmail}</span>}
+              {contactEmail && phone && ' · '}
+              {phone && <span data-field="phone">{phone}</span>}
             </span>
           </div>
           <CustomFieldsRow
@@ -420,16 +451,18 @@ function renderMinimal(p: CardRendererProps) {
           accent={colors.accent}
           size={isL ? { w: 68, h: 68 } : { w: 64, h: 64 }}
           shape="circle"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-4'}`}>
           <h2
+            data-field="fullName"
             className="text-[20px] font-medium tracking-tight truncate"
             style={{ color: colors.text }}
           >
             {fullName || 'Your Name'}
           </h2>
-          <p className="text-[11px] mt-1" style={{ color: colors.secondary }}>
+          <p data-field="title" className="text-[11px] mt-1" style={{ color: colors.secondary }}>
             {[title, organization].filter(Boolean).join(' · ') || 'Title · Organization'}
           </p>
 
@@ -437,11 +470,13 @@ function renderMinimal(p: CardRendererProps) {
             className={`mt-4 space-y-1 text-[9px] opacity-40`}
             style={{ color: colors.text }}
           >
-            {idNumber && <p className="font-mono">{idNumber}</p>}
+            {idNumber && <p data-field="idNumber" className="font-mono">{idNumber}</p>}
             <p>
-              {[contactEmail, phone, department]
-                .filter(Boolean)
-                .join(' · ')}
+              {contactEmail && <span data-field="contactEmail">{contactEmail}</span>}
+              {contactEmail && (phone || department) && ' · '}
+              {phone && <span data-field="phone">{phone}</span>}
+              {phone && department && ' · '}
+              {department && <span data-field="department">{department}</span>}
             </p>
           </div>
           <CustomFieldsRow
@@ -528,10 +563,12 @@ function renderCreative(p: CardRendererProps) {
           accent={colors.accent}
           size={isL ? { w: 88, h: 108 } : { w: 78, h: 96 }}
           shape="rounded"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
           <h2
+            data-field="fullName"
             className="text-[22px] font-black tracking-tight truncate leading-none"
             style={{ color: colors.text }}
           >
@@ -543,6 +580,7 @@ function renderCreative(p: CardRendererProps) {
               style={{ backgroundColor: colors.accent }}
             />
             <p
+              data-field="title"
               className="text-[11px] font-semibold truncate"
               style={{ color: colors.accent }}
             >
@@ -553,8 +591,8 @@ function renderCreative(p: CardRendererProps) {
             className="text-[10px] opacity-60 mt-1"
             style={{ color: colors.text }}
           >
-            {organization || 'Organization'}
-            {department ? ` / ${department}` : ''}
+            <span data-field="organization">{organization || 'Organization'}</span>
+            {department && <span data-field="department"> / {department}</span>}
           </p>
 
           <div
@@ -563,14 +601,15 @@ function renderCreative(p: CardRendererProps) {
           >
             {idNumber && (
               <span
+                data-field="idNumber"
                 className="px-1.5 py-0.5 rounded"
                 style={{ backgroundColor: `${colors.text}10` }}
               >
                 {idNumber}
               </span>
             )}
-            {contactEmail && <span className="py-0.5">{contactEmail}</span>}
-            {phone && <span className="py-0.5">{phone}</span>}
+            {contactEmail && <span data-field="contactEmail" className="py-0.5">{contactEmail}</span>}
+            {phone && <span data-field="phone" className="py-0.5">{phone}</span>}
           </div>
           <CustomFieldsRow
             fields={customFields}
@@ -625,6 +664,7 @@ function renderGovernment(p: CardRendererProps) {
             />
           </div>
           <p
+            data-field="organization"
             className="text-[10px] font-bold tracking-wider uppercase truncate"
             style={{ color: colors.text }}
           >
@@ -657,10 +697,12 @@ function renderGovernment(p: CardRendererProps) {
           accent={colors.primary}
           size={isL ? { w: 78, h: 96 } : { w: 70, h: 88 }}
           shape="square"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1 pb-0.5' : 'mt-2'}`}>
           <h2
+            data-field="fullName"
             className="text-[17px] font-bold tracking-wide truncate"
             style={{ color: colors.primary }}
           >
@@ -670,8 +712,8 @@ function renderGovernment(p: CardRendererProps) {
             className="text-[10px] font-semibold opacity-70 mt-0.5"
             style={{ color: colors.primary }}
           >
-            {title || 'Title'}
-            {department ? ` · ${department}` : ''}
+            <span data-field="title">{title || 'Title'}</span>
+            {department && <span data-field="department"> · {department}</span>}
           </p>
 
           <div
@@ -679,7 +721,7 @@ function renderGovernment(p: CardRendererProps) {
             style={{ color: colors.primary }}
           >
             {idNumber && (
-              <div>
+              <div data-field="idNumber">
                 <span className="opacity-35 text-[7px] uppercase tracking-wider block">
                   ID Number
                 </span>
@@ -687,7 +729,7 @@ function renderGovernment(p: CardRendererProps) {
               </div>
             )}
             {contactEmail && (
-              <div>
+              <div data-field="contactEmail">
                 <span className="opacity-35 text-[7px] uppercase tracking-wider block">
                   Email
                 </span>
@@ -695,7 +737,7 @@ function renderGovernment(p: CardRendererProps) {
               </div>
             )}
             {phone && (
-              <div>
+              <div data-field="phone">
                 <span className="opacity-35 text-[7px] uppercase tracking-wider block">
                   Phone
                 </span>
@@ -759,6 +801,7 @@ function renderAcademic(p: CardRendererProps) {
               </span>
             </div>
             <p
+              data-field="organization"
               className="text-[9px] font-semibold tracking-wider uppercase truncate"
               style={{ color: `${colors.background}cc` }}
             >
@@ -789,10 +832,12 @@ function renderAcademic(p: CardRendererProps) {
           accent={colors.secondary}
           size={isL ? { w: 76, h: 94 } : { w: 70, h: 86 }}
           shape="rounded"
+          dataField="photo"
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
           <h2
+            data-field="fullName"
             className="text-[18px] font-bold tracking-wide truncate"
             style={{ color: colors.text }}
           >
@@ -805,12 +850,13 @@ function renderAcademic(p: CardRendererProps) {
               className="w-1.5 h-1.5 rounded-full flex-shrink-0"
               style={{ backgroundColor: colors.accent }}
             />
-            <p className="text-[10px] font-medium" style={{ color: colors.secondary }}>
+            <p data-field="title" className="text-[10px] font-medium" style={{ color: colors.secondary }}>
               {title || 'Student / Faculty'}
             </p>
           </div>
           {department && (
             <p
+              data-field="department"
               className="text-[9px] opacity-50 mt-0.5"
               style={{ color: colors.text }}
             >
@@ -827,11 +873,12 @@ function renderAcademic(p: CardRendererProps) {
             className={`flex ${isL ? 'gap-4' : 'justify-center gap-4'} text-[9px] opacity-55`}
             style={{ color: colors.text }}
           >
-            {idNumber && <span className="font-mono">{idNumber}</span>}
-            {contactEmail && <span>{contactEmail}</span>}
+            {idNumber && <span data-field="idNumber" className="font-mono">{idNumber}</span>}
+            {contactEmail && <span data-field="contactEmail">{contactEmail}</span>}
           </div>
           {phone && (
             <p
+              data-field="phone"
               className={`text-[9px] opacity-45 mt-0.5 ${isL ? '' : 'text-center'}`}
               style={{ color: colors.text }}
             >
