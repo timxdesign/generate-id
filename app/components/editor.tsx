@@ -18,6 +18,7 @@ import { useCardStore, type CardStore } from '../store/card-store';
 import { STYLES, type StyleColors, getStyleById } from '../lib/styles';
 import CardRenderer, { CARD_W, CARD_H } from './card-renderer';
 import ExportModal from './export-modal';
+import PhotoCropModal from './photo-crop-modal';
 
 type Tab = 'style' | 'details' | 'colors';
 
@@ -67,6 +68,7 @@ export default function Editor() {
     contactEmail: store.contactEmail,
     phone: store.phone,
     photoUrl: store.photoUrl,
+    photoCrop: store.photoCrop,
     customFields: store.customFields,
     onFieldClick: handleFieldClick,
   };
@@ -323,17 +325,22 @@ function DetailsTab() {
   const photoRef = useRef<HTMLLabelElement>(null);
   const focusField = useCardStore((s) => s.focusField);
   const setFocusField = useCardStore((s) => s.setFocusField);
+  const [showCrop, setShowCrop] = useState(false);
 
   useEffect(() => {
     if (!focusField) return;
     if (focusField === 'photo') {
-      photoRef.current?.click();
+      if (store.photoUrl) {
+        setShowCrop(true);
+      } else {
+        photoRef.current?.click();
+      }
     } else if (inputRefs.current[focusField]) {
       inputRefs.current[focusField]?.focus();
       inputRefs.current[focusField]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     setFocusField(null);
-  }, [focusField, setFocusField]);
+  }, [focusField, setFocusField, store.photoUrl]);
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -341,6 +348,7 @@ function DetailsTab() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       store.setPhoto(ev.target?.result as string);
+      setShowCrop(true);
     };
     reader.readAsDataURL(file);
   };
@@ -378,12 +386,32 @@ function DetailsTab() {
           />
         </label>
         {store.photoUrl && (
-          <button
-            onClick={() => store.setPhoto(null)}
-            className="mt-1 text-[10px] text-zinc-400 hover:text-red-500 transition-colors"
-          >
-            Remove photo
-          </button>
+          <div className="flex gap-3 mt-1">
+            <button
+              onClick={() => setShowCrop(true)}
+              className="text-[10px] text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              Crop & zoom
+            </button>
+            <button
+              onClick={() => store.setPhoto(null)}
+              className="text-[10px] text-zinc-400 hover:text-red-500 transition-colors"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+
+        {showCrop && store.photoUrl && (
+          <PhotoCropModal
+            photoUrl={store.photoUrl}
+            initialCrop={store.photoCrop}
+            onDone={(crop) => {
+              store.setPhotoCrop(crop);
+              setShowCrop(false);
+            }}
+            onCancel={() => setShowCrop(false)}
+          />
         )}
       </div>
 

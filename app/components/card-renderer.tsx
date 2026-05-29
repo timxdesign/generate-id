@@ -1,7 +1,7 @@
 'use client';
 
 import type { CardStyle, StyleColors } from '../lib/styles';
-import type { Orientation, CustomField } from '../store/card-store';
+import type { Orientation, CustomField, PhotoCrop } from '../store/card-store';
 
 export interface CardRendererProps {
   style: CardStyle;
@@ -15,6 +15,7 @@ export interface CardRendererProps {
   contactEmail: string;
   phone: string;
   photoUrl: string | null;
+  photoCrop: PhotoCrop;
   customFields: CustomField[];
   onFieldClick?: (field: string) => void;
 }
@@ -67,6 +68,7 @@ function Photo({
   size,
   shape,
   dataField,
+  crop,
 }: {
   url: string | null;
   name: string;
@@ -74,6 +76,7 @@ function Photo({
   size: { w: number; h: number };
   shape: 'rounded' | 'circle' | 'square';
   dataField?: string;
+  crop?: PhotoCrop;
 }) {
   const radius =
     shape === 'circle' ? '50%' : shape === 'rounded' ? '10px' : '4px';
@@ -101,8 +104,13 @@ function Photo({
         <img
           src={url}
           alt="Photo"
-          className="w-full h-full object-cover"
+          className="w-full h-full"
           crossOrigin="anonymous"
+          style={{
+            objectFit: 'cover',
+            objectPosition: `${crop?.x ?? 50}% ${crop?.y ?? 50}%`,
+            transform: `scale(${crop?.zoom ?? 1})`,
+          }}
         />
       ) : (
         <div
@@ -175,6 +183,7 @@ function renderFancy(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -229,6 +238,7 @@ function renderFancy(p: CardRendererProps) {
           size={isL ? { w: 90, h: 110 } : { w: 82, h: 100 }}
           shape="rounded"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
@@ -319,6 +329,7 @@ function renderExecutive(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -355,6 +366,7 @@ function renderExecutive(p: CardRendererProps) {
           size={isL ? { w: 82, h: 82 } : { w: 76, h: 76 }}
           shape="circle"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
@@ -425,6 +437,7 @@ function renderMinimal(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -452,6 +465,7 @@ function renderMinimal(p: CardRendererProps) {
           size={isL ? { w: 68, h: 68 } : { w: 64, h: 64 }}
           shape="circle"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-4'}`}>
@@ -512,6 +526,7 @@ function renderCreative(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -564,6 +579,7 @@ function renderCreative(p: CardRendererProps) {
           size={isL ? { w: 88, h: 108 } : { w: 78, h: 96 }}
           shape="rounded"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>
@@ -638,6 +654,7 @@ function renderGovernment(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -698,6 +715,7 @@ function renderGovernment(p: CardRendererProps) {
           size={isL ? { w: 78, h: 96 } : { w: 70, h: 88 }}
           shape="square"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1 pb-0.5' : 'mt-2'}`}>
@@ -772,6 +790,7 @@ function renderAcademic(p: CardRendererProps) {
     contactEmail,
     phone,
     photoUrl,
+    photoCrop,
     customFields,
   } = p;
   const isL = orientation === 'landscape';
@@ -833,6 +852,7 @@ function renderAcademic(p: CardRendererProps) {
           size={isL ? { w: 76, h: 94 } : { w: 70, h: 86 }}
           shape="rounded"
           dataField="photo"
+          crop={photoCrop}
         />
 
         <div className={`min-w-0 ${isL ? 'flex-1' : 'mt-3'}`}>

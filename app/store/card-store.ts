@@ -11,6 +11,12 @@ export interface CustomField {
   value: string;
 }
 
+export interface PhotoCrop {
+  zoom: number;
+  x: number;
+  y: number;
+}
+
 type TextFieldKey =
   | 'fullName'
   | 'title'
@@ -29,6 +35,7 @@ interface CardState {
   contactEmail: string;
   phone: string;
   photoUrl: string | null;
+  photoCrop: PhotoCrop;
   style: CardStyle;
   orientation: Orientation;
   colors: StyleColors;
@@ -40,6 +47,7 @@ interface CardState {
 interface CardActions {
   setField: (field: TextFieldKey, value: string) => void;
   setPhoto: (url: string | null) => void;
+  setPhotoCrop: (crop: PhotoCrop) => void;
   setStyle: (style: CardStyle) => void;
   setOrientation: (orientation: Orientation) => void;
   setColor: (key: keyof StyleColors, value: string) => void;
@@ -64,6 +72,7 @@ export const useCardStore = create<CardStore>((set, get) => ({
   contactEmail: 'alex@studionoir.co',
   phone: '+1 (555) 042-8890',
   photoUrl: null,
+  photoCrop: { zoom: 1, x: 50, y: 50 },
   style: 'fancy',
   orientation: 'landscape',
   colors: { ...initialStyle.defaults },
@@ -72,7 +81,8 @@ export const useCardStore = create<CardStore>((set, get) => ({
   focusField: null,
 
   setField: (field, value) => set({ [field]: value }),
-  setPhoto: (url) => set({ photoUrl: url }),
+  setPhoto: (url) => set({ photoUrl: url, photoCrop: { zoom: 1, x: 50, y: 50 } }),
+  setPhotoCrop: (crop) => set({ photoCrop: crop }),
   setStyle: (style) => {
     const def = getStyleById(style);
     set({ style, colors: { ...def.defaults } });
