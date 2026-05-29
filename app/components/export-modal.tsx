@@ -47,11 +47,24 @@ export default function ExportModal({
         cacheBust: true,
       });
 
-      const link = document.createElement('a');
-      link.download = `generateid-${type}-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
+      const fileName = `generateid-${type}-${Date.now()}.png`;
+
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], fileName, { type: 'image/png' });
+
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = blobUrl;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      }
     } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') return;
       console.error('Export failed:', err);
     } finally {
       setIsExporting(false);
